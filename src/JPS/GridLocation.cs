@@ -1,6 +1,8 @@
+using System;
+
 namespace JPS
 {
-    public struct GridLocation
+    public struct GridLocation 
     {
         public static GridLocation Empty = new GridLocation(-1, -1);
 

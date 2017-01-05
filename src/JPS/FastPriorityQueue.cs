@@ -10,7 +10,7 @@ namespace JPS
     ///     See https://github.com/BlueRaja/High-Speed-Priority-Queue-for-C-Sharp/wiki/Getting-Started for more information
     /// </summary>
     /// <typeparam name="T">The values in the queue.  Must extend the FastPriorityQueueNode class</typeparam>
-    public class FastPriorityQueue<T> : IEnumerable<T>
+    internal class FastPriorityQueue<T> : IEnumerable<T>
         where T : FastPriorityQueueNode
     {
         private T[] _nodes;

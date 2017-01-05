@@ -1,6 +1,6 @@
 namespace JPS
 {
-    public class PathingNode : FastPriorityQueueNode
+    internal class PathingNode : FastPriorityQueueNode
     {
         public PathingNode(int x, int y)
             : this(new GridLocation(x, y))
@@ -19,7 +19,7 @@ namespace JPS
         public double G { get; set; }
         public bool Opened { get; set; }
         public bool Closed { get; set; }
-        public bool IsNavigable { get; set; }
+        //public bool IsNavigable { get; set; }
         public PathingNode Parent { get; set; }
     }
 }

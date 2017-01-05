@@ -6,18 +6,18 @@ namespace JPS
 {
     public class Grid
     {
-        private static readonly StepDirection[] Directions =
+        private static readonly GridLocation[] Directions =
         {
             // Cardinal
-            new StepDirection(-1, 0), // W
-            new StepDirection(1, 0), // E
-            new StepDirection(0, 1), // N 
-            new StepDirection(0, -1), // S
+            new GridLocation(-1, 0), // W
+            new GridLocation(1, 0), // E
+            new GridLocation(0, 1), // N 
+            new GridLocation(0, -1), // S
             // Diagonal
-            new StepDirection(-1, -1), // NW
-            new StepDirection(-1, 1), // SW
-            new StepDirection(1, -1), // NE
-            new StepDirection(1, 1) // SE
+            new GridLocation(-1, -1), // NW
+            new GridLocation(-1, 1), // SW
+            new GridLocation(1, -1), // NE
+            new GridLocation(1, 1) // SE
         };
 
         private readonly int _boundsMaxX;
@@ -27,28 +27,31 @@ namespace JPS
         private readonly int _boundsMinY;
 
         private readonly PathingNode[,] _grid;
+        private readonly bool[,] _navigable;
 
-        public Grid(int width, int height)
+        public Grid(bool[,] navigable)
         {
             _boundsMinX = 0;
-            _boundsMaxX = width - 1;
+            _boundsMaxX = navigable.GetUpperBound(0);
             _boundsMinY = 0;
-            _boundsMaxY = height - 1;
+            _boundsMaxY = navigable.GetUpperBound(1);
+
+            _navigable = navigable;
 
             // Initialise the Grid
-            _grid = new PathingNode[width, height];
-            for (var x = 0; x < width; x++)
-                for (var y = 0; y < height; y++)
-                    _grid[x, y] = new PathingNode(x, y) {IsNavigable = true};
+            _grid = new PathingNode[_boundsMaxX + 1, _boundsMaxY + 1];
+            for (var x = _boundsMinX; x <= _boundsMaxX; x++)
+                for (var y = _boundsMinY; y <= _boundsMaxY; y++)
+                    _grid[x, y] = new PathingNode(x, y);
         }
 
-        public PathingNode this[int x, int y] { get { return _grid[x, y]; } }
-        public PathingNode this[GridLocation location] { get { return _grid[location.X, location.Y]; } }
+        internal PathingNode this[int x, int y] { get { return _grid[x, y]; } }
+        internal PathingNode this[GridLocation location] { get { return _grid[location.X, location.Y]; } }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsNavigable(int x, int y)
         {
-            return InBounds(x, y) && this[x, y].IsNavigable;
+            return InBounds(x, y) && _navigable[x, y];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -58,7 +61,7 @@ namespace JPS
                    y >= _boundsMinY && y <= _boundsMaxY;
         }
 
-        public IEnumerable<PathingNode> Neighbours(PathingNode node)
+        internal IEnumerable<PathingNode> Neighbours(PathingNode node)
         {
             if (node.Parent != null)
             {
@@ -78,13 +81,13 @@ namespace JPS
                     if (IsNavigable(n.X + dNorm.X, n.Y))
                         yield return _grid[n.X + dNorm.X, n.Y];
 
-                    if (IsNavigable(n.X, n.Y + dNorm.Y) || IsNavigable(n.X + dNorm.X, n.Y))
+                    if ((IsNavigable(n.X, n.Y + dNorm.Y) || IsNavigable(n.X + dNorm.X, n.Y)) && IsNavigable(n.X + dNorm.X, n.Y + dNorm.Y))
                         yield return _grid[n.X + dNorm.X, n.Y + dNorm.Y];
 
-                    if (!IsNavigable(n.X - dNorm.X, n.Y) && IsNavigable(n.X, n.Y + dNorm.Y))
+                    if (!IsNavigable(n.X - dNorm.X, n.Y) && IsNavigable(n.X, n.Y + dNorm.Y) && IsNavigable(n.X - dNorm.X, n.Y + dNorm.Y))
                         yield return _grid[n.X - dNorm.X, n.Y + dNorm.Y];
 
-                    if (!IsNavigable(n.X, n.Y - dNorm.Y) && IsNavigable(n.X + dNorm.X, n.Y))
+                    if (!IsNavigable(n.X, n.Y - dNorm.Y) && IsNavigable(n.X + dNorm.X, n.Y) && IsNavigable(n.X + dNorm.X, n.Y - dNorm.Y))
                         yield return _grid[n.X + dNorm.X, n.Y - dNorm.Y];
                 }
                 // Cardinal
@@ -96,10 +99,10 @@ namespace JPS
                         {
                             yield return _grid[n.X, n.Y + dNorm.Y];
 
-                            if (!IsNavigable(n.X + 1, n.Y))
+                            if (!IsNavigable(n.X + 1, n.Y) && IsNavigable(n.X + 1, n.Y + dNorm.Y))
                                 yield return _grid[n.X + 1, n.Y + dNorm.Y];
 
-                            if (!IsNavigable(n.X - 1, n.Y))
+                            if (!IsNavigable(n.X - 1, n.Y) && IsNavigable(n.X - 1, n.Y + dNorm.Y))
                                 yield return _grid[n.X - 1, n.Y + dNorm.Y];
                         }
                     }
@@ -107,10 +110,10 @@ namespace JPS
                     {
                         yield return _grid[n.X + dNorm.X, n.Y];
 
-                        if (!IsNavigable(n.X, n.Y + 1))
+                        if (!IsNavigable(n.X, n.Y + 1) && IsNavigable(n.X + dNorm.X, n.Y + 1))
                             yield return _grid[n.X + dNorm.X, n.Y + 1];
 
-                        if (!IsNavigable(n.X, n.Y - 1))
+                        if (!IsNavigable(n.X, n.Y - 1) && IsNavigable(n.X + dNorm.X, n.Y - 1))
                             yield return _grid[n.X + dNorm.X, n.Y - 1];
                     }
                 }

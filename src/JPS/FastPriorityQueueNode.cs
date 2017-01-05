@@ -1,6 +1,6 @@
 ﻿namespace JPS
 {
-    public class FastPriorityQueueNode
+    internal class FastPriorityQueueNode
     {
         /// <summary>
         ///     The Priority to insert this node at.  Must be set BEFORE adding a node to the queue

@@ -20,7 +20,7 @@ namespace JPS
             _goal = goal;
             _grid = grid;
 
-            _open = new FastPriorityQueue<PathingNode>(1000);
+            _open = new FastPriorityQueue<PathingNode>(4096);
         }
 
         public List<GridLocation> FindPath()
